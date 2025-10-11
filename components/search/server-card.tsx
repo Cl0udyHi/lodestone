@@ -4,7 +4,7 @@ import { Server } from "@/utils/types";
 import { TagsContext } from "./servers-section";
 import { useContext } from "react";
 import Image from "next/image";
-import { AddTag } from "./search";
+import { AddTag } from "../../utils/search";
 import defaultBanner from "@/public/assets/images/default-server-banner.png";
 import classNames from "classnames";
 import { AnimatePresence, motion } from "framer-motion";

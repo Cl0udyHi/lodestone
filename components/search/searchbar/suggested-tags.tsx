@@ -4,7 +4,7 @@ import { Tags } from "@/utils/data";
 import classNames from "classnames";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { SearchContext, TagsContext } from "../servers-section";
-import { AddTag } from "../search";
+import { AddTag } from "../../../utils/search";
 
 export default function SuggestedTags() {
   const [searchInput, setSearchInput] = useContext(SearchContext)!;
@@ -25,25 +25,12 @@ export default function SuggestedTags() {
     setTagsList(filteredTags);
   }, [filteredTags]);
 
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  const openState: boolean = useMemo(() => {
-    if (searchInput.trim() === "") return false;
-    if (tagsList.length < 1) return false;
-
-    return true;
-  }, [searchInput, tagsList]);
-
-  useEffect(() => {
-    setIsOpen(openState);
-  }, [searchInput, tagsList]);
-
   return (
     <div
       className={classNames(
         "absolute p-2 inset-0 w-full h-fit bg-neutral-100 top-[calc(100%+0.5em)] border border-neutral-600 rounded-lg group-focus-within:flex hidden flex-col z-20 overflow-hidden",
         {
-          "hidden!": !isOpen,
+          "hidden!": searchInput.trim() === "" || tagsList.length < 1,
         }
       )}
     >
