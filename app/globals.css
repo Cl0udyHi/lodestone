@@ -1,26 +1,90 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --neutral-100: #eceef1;
+  --neutral-200: #c8cdd8;
+  --neutral-300: #a1abbc;
+  --neutral-400: #7a88a1;
+  --neutral-500: #5c6982;
+  --neutral-600: #434c5e;
+  --neutral-700: #292f3a;
+  --neutral-800: #0f1115;
+
+  /* --neutral-100: #0f1115;
+  --neutral-200: #292f3a;
+  --neutral-300: #434c5e;
+  --neutral-400: #5c6982;
+  --neutral-500: #7a88a1;
+  --neutral-600: #a1abbc;
+  --neutral-700: #c8cdd8;
+  --neutral-800: #eceef1; */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@theme {
+  --color-*: initial;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --color-neutral-100: var(--neutral-100);
+  --color-neutral-200: var(--neutral-200);
+  --color-neutral-300: var(--neutral-300);
+  --color-neutral-400: var(--neutral-400);
+  --color-neutral-500: var(--neutral-500);
+  --color-neutral-600: var(--neutral-600);
+  --color-neutral-700: var(--neutral-700);
+  --color-neutral-800: var(--neutral-800);
+
+  --animate-wiggle: wiggle 0.15s ease-in-out;
+  @keyframes wiggle {
+    0%,
+    100% {
+      transform: rotate(-3deg);
+    }
+    50% {
+      transform: rotate(3deg);
+    }
   }
 }
 
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* @media (prefers-color-scheme: dark) {
+  :root {
+    --neutral-100: #0f1115;
+    --neutral-200: #292f3a;
+    --neutral-300: #434c5e;
+    --neutral-400: #5c6982;
+    --neutral-500: #7a88a1;
+    --neutral-600: #a1abbc;
+    --neutral-700: #c8cdd8;
+    --neutral-800: #eceef1;
+  }
+} */
+
+* {
+  font-family: "Poppins", sans-serif;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+
+  background: var(--neutral-800);
+  color: var(--neutral-100);
+}
+
+button {
+  cursor: pointer;
 }
