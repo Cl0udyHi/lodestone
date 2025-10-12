@@ -29,7 +29,7 @@ export default function ServersSection() {
   const [tags, setTags] = useState<string[]>([]);
 
   const filteredServers: Server[] = useMemo(() => {
-    let newList: Server[] = Servers;
+    let newList: Server[] = servers;
 
     if (searchValue.length < 1 || tags.length < 1) {
       newList = Servers;
@@ -55,7 +55,6 @@ export default function ServersSection() {
       });
     }
 
-    setServers(newList);
     return newList;
   }, [searchValue, tags]);
 

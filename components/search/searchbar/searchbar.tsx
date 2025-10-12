@@ -12,10 +12,11 @@ import React, {
   useState,
 } from "react";
 import SuggestedTags from "./suggested-tags";
-import { SearchContext, TagsContext } from "../servers-section";
+import { SearchContext, ServersContext, TagsContext } from "../servers-section";
 
 export default function SearchBar() {
   const [search, setSearch] = useContext(SearchContext)!;
+  const [servers, setServers] = useContext(ServersContext)!;
   const [tags, setTags] = useContext(TagsContext)!;
 
   const inputRef: RefObject<HTMLInputElement | null> = useRef(null);
@@ -29,6 +30,10 @@ export default function SearchBar() {
 
     setSearch(searchValue);
   }
+
+  const fetchServers = async () => {
+    setServers(Servers);
+  };
 
   return (
     <div className="flex flex-col gap-2">

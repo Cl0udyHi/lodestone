@@ -8,6 +8,7 @@ import { AddTag } from "../../utils/search";
 import defaultBanner from "@/public/assets/images/default-server-banner.png";
 import classNames from "classnames";
 import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "sonner";
 
 export default function ServerCard({ server }: { server: Server }) {
   const [tags, setTags] = useContext(TagsContext)!;
@@ -15,17 +16,12 @@ export default function ServerCard({ server }: { server: Server }) {
   function handleTagClick(e: React.MouseEvent, tag: string) {
     const successful: boolean = AddTag(tag, tags, setTags);
     if (successful) return;
+  }
 
-    // Shake if there is already a tag
-    // e.currentTarget.animate(
-    //   [
-    //     { transform: "translateX(-0.25em)" },
-    //     { transform: "translateX(0.25em)" },
-    //     { transform: "translateX(-0.25em)" },
-    //     { transform: "translateX(0.25em)" },
-    //   ],
-    //   { duration: 250, easing: "ease-in-out" }
-    // );
+  function copyToClipboard(text: string) {
+    navigator.clipboard.writeText(text).then(() => {
+      toast("Copied to clipboard");
+    });
   }
 
   return (
@@ -44,7 +40,7 @@ export default function ServerCard({ server }: { server: Server }) {
           </span>
           <button
             type="button"
-            onClick={() => navigator.clipboard.writeText(server.ip)}
+            onClick={() => copyToClipboard(server.ip)}
             className="flex w-fit text-sm text-neutral-100 line-clamp-1"
           >
             {server.ip}
