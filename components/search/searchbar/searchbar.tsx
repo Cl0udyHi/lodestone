@@ -1,51 +1,41 @@
 "use client";
 
-import { Servers } from "@/utils/data";
 import React, {
-  Dispatch,
-  FormEvent,
-  Ref,
   RefObject,
-  SetStateAction,
   useContext,
+  useEffect,
   useRef,
   useState,
 } from "react";
 import SuggestedTags from "./suggested-tags";
-import { SearchContext, ServersContext, TagsContext } from "../servers-section";
+import { ServersContext, TagsContext } from "../servers-section";
+import { fetchServersData } from "@/utils/utils";
+import { useDebounce } from "@/utils/hooks";
 
 export default function SearchBar() {
-  const [search, setSearch] = useContext(SearchContext)!;
-  const [servers, setServers] = useContext(ServersContext)!;
+  const [search, setSearch] = useState<string>("");
+
+  const setServers = useContext(ServersContext)![1];
   const [tags, setTags] = useContext(TagsContext)!;
 
+  const debouncedSearch = useDebounce(search);
+
   const inputRef: RefObject<HTMLInputElement | null> = useRef(null);
-  const formRef: RefObject<HTMLFormElement | null> = useRef(null);
 
-  function SubmitSearch(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  useEffect(() => {
+    const loadServers = async () => {
+      setServers([]);
 
-    const formData = new FormData(e.currentTarget);
-    const searchValue = formData.get("search") as string;
+      const fetchedServers = await fetchServersData(debouncedSearch);
+      setServers(fetchedServers);
+    };
 
-    setSearch(searchValue);
-  }
-
-  const fetchServers = async () => {
-    setServers(Servers);
-  };
+    loadServers();
+  }, [debouncedSearch]);
 
   return (
     <div className="flex flex-col gap-2">
-      <form
-        ref={formRef}
-        onSubmit={(e) => {
-          SubmitSearch(e);
-          inputRef.current?.blur();
-        }}
-        onChange={(e) => SubmitSearch(e)}
-        className="group relative w-full flex outline outline-neutral-600 rounded-full focus-within:outline-2"
-      >
+      <div className="group relative w-full flex outline outline-neutral-600 rounded-full focus-within:outline-2">
         <input
           ref={inputRef}
           value={search}
@@ -93,7 +83,7 @@ export default function SearchBar() {
         )}
 
         <SuggestedTags />
-      </form>
+      </div>
       <div className="flex gap-1 flex-wrap">
         {tags.length > 1 && (
           <button
