@@ -1,11 +1,10 @@
-import { Servers } from "./data";
+import { Servers, Tags } from "./data";
 import { Server } from "./types";
 
-const filteredServers = (search: string) => {
+const filteredServers = (search: string, tags: string[]) => {
   let newList: Server[] = Servers;
 
-  //   if (search.length < 1 || tags.length < 1) {
-  if (search.length < 1) {
+  if (search.length < 1 || tags.length < 1) {
     newList = Servers;
   }
 
@@ -23,16 +22,29 @@ const filteredServers = (search: string) => {
     });
   }
 
-  //   if (tags.length > 0) {
-  //     newList = newList.filter((server) => {
-  //       return tags.every((tag) => server.tags?.includes(tag));
-  //     });
-  //   }
+  if (tags.length > 0) {
+    newList = newList.filter((server) => {
+      return tags.every((tag) => server.tags?.includes(tag));
+    });
+  }
 
   return newList;
 };
 
-export async function fetchServersData(search: string) {
+export async function fetchServers(search: string, tags: string[]) {
   await new Promise((resolve) => setTimeout(resolve, 1000));
-  return filteredServers(search);
+  return filteredServers(search, tags);
+}
+
+function filterTags(word: string, tags: string[]) {
+  return word !== undefined
+    ? Tags.filter(
+        (tag) => tag.toLowerCase().includes(word) && !tags.includes(tag)
+      )
+    : [];
+}
+
+export async function fetchTags(word: string, tags: string[]) {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  return filterTags(word, tags);
 }

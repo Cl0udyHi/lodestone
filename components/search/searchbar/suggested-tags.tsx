@@ -1,45 +1,37 @@
 "use client";
 
-import { Tags } from "@/utils/data";
 import classNames from "classnames";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext } from "react";
 import { SearchContext, TagsContext } from "../servers-section";
 import { AddTag } from "../../../utils/search";
+import { useQuery } from "@tanstack/react-query";
+import { fetchTags } from "@/utils/utils";
 
 export default function SuggestedTags() {
-  const [searchInput, setSearchInput] = useContext(SearchContext)!;
+  const [search, setSearch] = useContext(SearchContext)!;
   const [tags, setTags] = useContext(TagsContext)!;
 
-  const [tagsList, setTagsList] = useState<string[]>([]);
-
-  const filteredTags: string[] = useMemo(() => {
-    const word = searchInput.trim().toLowerCase().split(/\s+/).at(-1);
-    return word !== undefined
-      ? Tags.filter(
-          (tag) => tag.toLowerCase().includes(word) && !tags.includes(tag)
-        )
-      : [];
-  }, [searchInput, tags]);
-
-  useEffect(() => {
-    setTagsList(filteredTags);
-  }, [filteredTags]);
+  const { data } = useQuery({
+    queryKey: ["tags", { search, tags }],
+    queryFn: () => fetchTags(search[-1], tags),
+  });
 
   return (
     <div
       className={classNames(
         "absolute p-2 inset-0 w-full h-fit bg-neutral-100 top-[calc(100%+0.5em)] border border-neutral-600 rounded-lg group-focus-within:flex hidden flex-col z-20 overflow-hidden",
         {
-          "hidden!": searchInput.trim() === "" || tagsList.length < 1,
+          "hidden!": search.trim() === "" || (data && data.length < 1),
         }
       )}
     >
       <ul className="max-h-[200px] overflow-y-scroll">
-        {filteredTags.length > 0 &&
-          filteredTags.map((tag, index) => (
+        {data &&
+          data.length > 0 &&
+          data.map((tag, index) => (
             <li key={index}>
               <button
-                onClick={() => AddTag(tag, tags, setTags, setSearchInput)}
+                onClick={() => AddTag(tag, tags, setTags, setSearch)}
                 type="button"
                 className="w-full flex gap-2 p-2 hover:bg-neutral-200 text-base text-neutral-800 font-normal rounded-sm"
               >

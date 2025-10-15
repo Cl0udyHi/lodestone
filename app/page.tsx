@@ -17,6 +17,7 @@ export default function Home() {
           alt="Steve looking through a Spyglass"
         />
       </section>
+
       <ServersSection />
     </div>
   );

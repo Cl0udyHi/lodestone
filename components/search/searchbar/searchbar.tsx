@@ -1,53 +1,35 @@
 "use client";
 
-import React, {
-  RefObject,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import SuggestedTags from "./suggested-tags";
-import { ServersContext, TagsContext } from "../servers-section";
-import { fetchServersData } from "@/utils/utils";
+import React, { useContext, useEffect, useState } from "react";
+import { SearchContext, TagsContext } from "../servers-section";
 import { useDebounce } from "@/utils/hooks";
 
 export default function SearchBar() {
-  const [search, setSearch] = useState<string>("");
-
-  const setServers = useContext(ServersContext)![1];
+  const setSearch = useContext(SearchContext)![1];
   const [tags, setTags] = useContext(TagsContext)!;
 
-  const debouncedSearch = useDebounce(search);
+  const [value, setValue] = useState<string>("");
 
-  const inputRef: RefObject<HTMLInputElement | null> = useRef(null);
+  const debouncedSearch = useDebounce(value);
 
   useEffect(() => {
-    const loadServers = async () => {
-      setServers([]);
-
-      const fetchedServers = await fetchServersData(debouncedSearch);
-      setServers(fetchedServers);
-    };
-
-    loadServers();
+    setSearch(debouncedSearch);
   }, [debouncedSearch]);
 
   return (
     <div className="flex flex-col gap-2">
       <div className="group relative w-full flex outline outline-neutral-600 rounded-full focus-within:outline-2">
         <input
-          ref={inputRef}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
           className="w-full pl-5 text-neutral-800 placeholder:text-neutral-500 py-3 focus:outline-0 rounded-full"
           name="search"
           placeholder="Type server name, IP, or tags (e.g. 'Survival', 'PvP', 'server.xyz')"
           autoComplete="off"
         />
-        {search.length > 0 ? (
+        {value.length > 0 ? (
           <button
-            onClick={() => setSearch("")}
+            onClick={() => setValue("")}
             type="button"
             name="reset"
             className="w-10 h-10 p-2 rounded-full m-2"
@@ -82,7 +64,7 @@ export default function SearchBar() {
           </button>
         )}
 
-        <SuggestedTags />
+        {/* <SuggestedTags /> */}
       </div>
       <div className="flex gap-1 flex-wrap">
         {tags.length > 1 && (
