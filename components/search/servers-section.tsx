@@ -32,11 +32,14 @@ export default function ServersSection() {
 }
 
 function Content() {
-  const [servers, setServers] = useState<Server[]>([]);
   const [searchValue, setSearchValue] = useState<string>("");
   const [tags, setTags] = useState<string[]>([]);
 
-  const { data, status } = useQuery({
+  const {
+    data: servers,
+    status,
+    error,
+  } = useQuery({
     queryKey: ["servers", { searchValue, tags }],
     queryFn: () => fetchServers(searchValue, tags),
   });
@@ -44,34 +47,24 @@ function Content() {
   return (
     <section className="w-full min-h-screen bg-neutral-100 px-16 py-8 flex flex-col gap-5">
       <h1 className="font-medium text-2xl text-neutral-800">Server List</h1>
-      <ServersContext.Provider value={[servers, setServers]}>
-        <SearchContext.Provider value={[searchValue, setSearchValue]}>
-          <TagsContext.Provider value={[tags, setTags]}>
-            <SearchBar />
+      <SearchContext.Provider value={[searchValue, setSearchValue]}>
+        <TagsContext.Provider value={[tags, setTags]}>
+          <SearchBar error={error} />
 
-            <div className="grid grid-cols-2 gap-4">
-              {status === "pending" ? (
-                <SuspenseServers />
-              ) : (
-                <ServersList servers={data ?? []} />
-              )}
-            </div>
-          </TagsContext.Provider>
-        </SearchContext.Provider>
-      </ServersContext.Provider>
+          <div className="grid grid-cols-2 gap-4">
+            {status === "pending" ? (
+              <SuspenseServers />
+            ) : (
+              servers?.map((server, index) => {
+                return <ServerCard key={index} server={server} />;
+              })
+            )}
+          </div>
+        </TagsContext.Provider>
+      </SearchContext.Provider>
     </section>
   );
 }
-
-const ServersList = ({ servers }: { servers: Server[] }) => {
-  return (
-    <>
-      {servers.map((server, index) => {
-        return <ServerCard key={index} server={server} />;
-      })}
-    </>
-  );
-};
 
 const SuspenseServers = () => {
   return (

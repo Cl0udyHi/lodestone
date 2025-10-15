@@ -4,7 +4,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { SearchContext, TagsContext } from "../servers-section";
 import { useDebounce } from "@/utils/hooks";
 
-export default function SearchBar() {
+export default function SearchBar({ error }: { error: Error | null }) {
   const setSearch = useContext(SearchContext)![1];
   const [tags, setTags] = useContext(TagsContext)!;
 
