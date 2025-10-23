@@ -4,41 +4,47 @@ import { ServerSearchQuery } from "./types";
 const filterServers = (query: ServerSearchQuery) => {
   const { text, platforms, tags, versions } = query;
 
-  if (text.length < 1) {
-    return Servers;
-  }
-
-  const words: string[] = text.trim().toLowerCase().split(/\s+/);
-
   let list = Servers;
 
   // Filter with text
-  list = Servers.filter((server) => {
-    return words.every(
-      (word) =>
-        server.name.toLowerCase().includes(word) ||
-        server.ip.toLowerCase().includes(word) ||
-        server.description.toLowerCase().includes(word) ||
-        server.port.toString() === word
-    );
-  });
+  if (text.length >= 1) {
+    const words: string[] = text.trim().toLowerCase().split(/\s+/);
+    list = list.filter((server) => {
+      return words.every(
+        (word) =>
+          server.name.toLowerCase().includes(word) ||
+          server.ip.toLowerCase().includes(word) ||
+          server.description.toLowerCase().includes(word) ||
+          server.port.toString() === word
+      );
+    });
+  }
 
-  // Filter with platform
-  list = list.filter((server) => {
-    return platforms?.every((platform) => server.platforms.includes(platform));
-  });
+  // Filter with platform - server must have EXACTLY these platforms
+  if (platforms && platforms.length > 0) {
+    list = list.filter((server) => {
+      return (
+        server.platforms.length === platforms.length &&
+        platforms.every((platform) => server.platforms.includes(platform))
+      );
+    });
+  }
 
-  // Filter with version
-  list = list.filter((server) => {
-    return versions.every((version) =>
-      server.supportedVersions.includes(version)
-    );
-  });
+  // Filter with version - server must support at least one selected version
+  if (versions && versions.length > 0) {
+    list = list.filter((server) => {
+      return versions.some((version) =>
+        server.supportedVersions.includes(version)
+      );
+    });
+  }
 
-  // Filter with tags
-  list = list.filter((server) => {
-    return tags.every((tag) => server.tags?.includes(tag));
-  });
+  // Filter with tags - server must have all selected tags (keep as every)
+  if (tags && tags.length > 0) {
+    list = list.filter((server) => {
+      return tags.every((tag) => server.tags?.includes(tag));
+    });
+  }
 
   return list;
 };

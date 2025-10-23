@@ -1,32 +1,71 @@
 "use client";
 
 import React, { useContext, useEffect, useState } from "react";
-import { SearchQueryContext } from "../servers-section";
-import { useDebounce } from "@/utils/hooks/useDebounce";
+import { SearchQueryContext } from "./servers-section";
+import { useDebounce } from "@uidotdev/usehooks";
 
 import SearchIcon from "@/public/assets/icons/search.svg";
 import CloseIcon from "@/public/assets/icons/close.svg";
 
 import Dropdown from "@/components/dropdown";
-import { ServerSearchQuery } from "@/utils/types";
-import { versions } from "@/utils/data";
+import { DDItem, DDItemId, ServerSearchQuery } from "@/utils/types";
+import { platforms, versions } from "@/utils/data";
+import { useServers } from "@/utils/hooks/useServers";
 
 export default function SearchBar() {
   const setSearchQuery = useContext(SearchQueryContext)![1];
 
   const [value, setValue] = useState<string>("");
-  const debouncedSearch = useDebounce(value);
+  const debouncedSearch = useDebounce(value, 300);
+
+  const [selectedVersions, setSelectedVersions] = useState<string[]>([]);
+  const debouncedVersions = useDebounce(selectedVersions, 300);
+
+  function handleSupportedVersions(selectedItems: DDItemId[]) {
+    setSelectedVersions(() => {
+      const list = versions.map((version, index) => ({
+        id: index,
+        label: version,
+      }));
+
+      const selectedVersionStrings = list
+        .filter((item) => selectedItems.includes(item.id))
+        .map((item) => item.label);
+
+      return selectedVersionStrings;
+    });
+  }
+
+  const [selectedPlatform, setSelectedPlatform] = useState<string[]>([]);
+  const debouncedPlatform = useDebounce(selectedPlatform, 300);
+
+  function handlePlatform(selectedItems: DDItemId[]) {
+    setSelectedPlatform(() => {
+      const list = platforms.map((p, index) => ({
+        id: index,
+        label: p,
+      }));
+
+      const selectedPlatforms = list
+        .filter((item) => selectedItems.includes(item.id))
+        .map((item) => item.label);
+
+      return selectedPlatforms;
+    });
+  }
 
   useEffect(() => {
     setSearchQuery((prev) => {
       const newQuery: ServerSearchQuery = {
         ...prev,
         text: debouncedSearch,
+        versions: debouncedVersions,
+        platforms: debouncedPlatform,
       };
 
       return newQuery;
     });
-  }, [debouncedSearch]);
+  }, [debouncedSearch, debouncedVersions, debouncedPlatform]);
 
   return (
     <div className="flex flex-col gap-2">
@@ -68,6 +107,7 @@ export default function SearchBar() {
             { id: 0, label: "Java Edition" },
             { id: 1, label: "Bedrock Edition" },
           ]}
+          onSelect={(selectedItems) => handlePlatform(selectedItems)}
         />
 
         <Dropdown
@@ -77,6 +117,7 @@ export default function SearchBar() {
             label: version,
           }))}
           search
+          onSelect={(selectedItems) => handleSupportedVersions(selectedItems)}
         />
       </div>
 

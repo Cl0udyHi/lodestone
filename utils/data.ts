@@ -34,7 +34,7 @@ export const Servers: Server[] = [
     iconUrl: cubeIcon.src,
     bannerUrl: cubeBanner.src,
     supportedVersions: ["1.16.5", "1.21.10"],
-    platforms: ["Java Edition"],
+    platforms: ["Java Edition", "Bedrock Edition"],
   },
   {
     id: "2",
@@ -85,6 +85,8 @@ export const Tags: string[] = [
   "kitpvp",
   "towny",
 ];
+
+export const platforms: string[] = ["Java Edition", "Bedrock Edition"];
 
 export const versions: string[] = [
   // Release versions

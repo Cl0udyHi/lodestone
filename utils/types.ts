@@ -10,12 +10,15 @@ export type Server = {
   iconUrl?: string;
   bannerUrl?: string;
   supportedVersions: string[];
-  platforms: Platform[];
+  platforms: string[];
 };
 
 export type ServerSearchQuery = {
   text: string;
-  platforms: Platform[];
+  platforms: string[];
   versions: string[];
   tags: string[];
 };
+
+export type DDItemId = string | number;
+export type DDItem = { id: DDItemId; label: string };

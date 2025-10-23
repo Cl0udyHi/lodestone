@@ -1,4 +1,12 @@
-import { ChangeEvent, useContext, useEffect, useRef, useState } from "react";
+import {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Button } from "./ui/button";
 import classNames from "classnames";
 
@@ -8,14 +16,13 @@ import SearchIcon from "@/public/assets/icons/search.svg";
 import CloseIcon from "@/public/assets/icons/close.svg";
 
 import { useOutsideClick } from "@/utils/hooks/useClickoutside";
-
-type ItemId = string | number;
-type Item = { id: ItemId; label: string };
+import { DDItem, DDItemId } from "@/utils/types";
+import { RemoveScroll } from "react-remove-scroll";
 
 interface Dropdown {
   name: string;
-  items: Item[];
-  onSelect?: (selectedItems: ItemId[], items: Item[]) => void;
+  items: DDItem[];
+  onSelect?: (selectedItems: DDItemId[], items: DDItem[]) => void;
   onOpen?: (isOpen: boolean) => void;
   search?: boolean;
 }
@@ -27,35 +34,43 @@ export default function Dropdown({
   onOpen,
   search,
 }: Dropdown) {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const ref = useOutsideClick<HTMLDivElement>(() => setIsOpen(false), isOpen);
+  const [searchValue, setSearchValue] = useState<string>("");
 
-  function handleOpen() {
-    const newState = !isOpen;
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const ref = useOutsideClick<HTMLDivElement>(() => handleOpen(false), isOpen);
+
+  function handleOpen(bool?: boolean) {
+    const newState = bool ? bool : !isOpen;
 
     setIsOpen(newState);
     onOpen?.(newState);
+
+    if (newState == false)
+      setTimeout(() => {
+        setSearchValue("");
+      }, 150);
   }
 
-  const [selectedItems, setSelectedItems] = useState<ItemId[]>([]);
+  const [selectedItems, setSelectedItems] = useState<DDItemId[]>([]);
 
-  function handleSelect(item: Item) {
-    setSelectedItems((prev) => {
-      if (prev.includes(item.id)) return prev.filter((id) => id !== item.id);
+  function handleSelect(item?: DDItem) {
+    let newSelectedItems: DDItemId[] = !item
+      ? []
+      : selectedItems.includes(item.id)
+      ? selectedItems.filter((id) => id !== item.id)
+      : [...selectedItems, item.id];
 
-      return [...prev, item.id];
-    });
-
-    onSelect?.(selectedItems, items);
+    setSelectedItems(newSelectedItems);
+    onSelect?.(newSelectedItems, items);
   }
 
-  const [list, setList] = useState<Item[]>([]);
+  const [list, setList] = useState<DDItem[]>([]);
 
   function updateItems(value: string) {
     const words: string[] = value.toLowerCase().split(" ");
 
     const list = items.filter((item) => {
-      return words.every((word) => item.label.startsWith(word));
+      return words.every((word) => item.label.toLowerCase().includes(word));
     });
 
     setList(list);
@@ -63,7 +78,7 @@ export default function Dropdown({
 
   useEffect(() => {
     updateItems("");
-  }, []);
+  }, [items]);
 
   return (
     <div ref={ref} className="relative">
@@ -78,58 +93,78 @@ export default function Dropdown({
           })}
         />
       </Button>
-      <ul
-        className={classNames(
-          `min-w-full max-h-[calc(48px*5)] absolute left-0 top-[calc(100%+0.25rem)] bg-neutral-100 rounded-lg z-50 text-neutral-800 border border-neutral-300 transition-all duration-150 ease-in-out overflow-hidden`,
-          "overflow-y-scroll scrollbar-hide",
-          { "": isOpen },
-          { "opacity-0 pointer-events-none -translate-y-2": !isOpen }
-        )}
-      >
-        {(search || items.length > 10) && (
-          <SearchBar
-            onChange={(value) => {
-              updateItems(value);
-            }}
-            onClear={() => setSelectedItems([])}
-          />
-        )}
+      <RemoveScroll enabled={isOpen}>
+        <ul
+          className={classNames(
+            `min-w-full max-h-[calc(48px*5)] absolute left-0 top-[calc(100%+0.25rem)] bg-neutral-100 rounded-lg z-50 text-neutral-800 border border-neutral-300 transition-all duration-150 ease-in-out overflow-hidden`,
+            "overflow-y-scroll scrollbar-hide",
+            { "opacity-0 pointer-events-none -translate-y-2": !isOpen }
+          )}
+        >
+          {(search || items.length > 10) && (
+            <SearchBar
+              onChange={(value) => {
+                updateItems(value);
+              }}
+              onClear={() => handleSelect()}
+              value={searchValue}
+              setValue={setSearchValue}
+              selectedItems={selectedItems}
+              setSelectedItems={setSelectedItems}
+            />
+          )}
 
-        {list.map((item, index) => (
-          <li key={index}>
-            <button
-              onClick={() => handleSelect(item)}
-              className="flex justify-between gap-4 text-start w-full px-4 py-3 hover:bg-neutral-200 bg-neutral-100 text-base text-nowrap"
-            >
-              {item.label}
-              <CheckmarkIcon
-                className={classNames("fill-neutral-800 w-5", {
-                  "opacity-0": !selectedItems?.includes(item.id),
-                })}
-              />
-            </button>
-          </li>
-        ))}
-      </ul>
+          {list.map((item, index) => (
+            <li key={index}>
+              <button
+                onClick={() => handleSelect(item)}
+                className="flex justify-between gap-4 text-start w-full px-4 py-3 hover:bg-neutral-200 bg-neutral-100 text-base text-nowrap"
+              >
+                {item.label}
+                <CheckmarkIcon
+                  className={classNames("fill-neutral-800 w-5", {
+                    "opacity-0": !selectedItems?.includes(item.id),
+                  })}
+                />
+              </button>
+            </li>
+          ))}
+        </ul>
+      </RemoveScroll>
     </div>
   );
 }
 
 const SearchBar = ({
+  value,
+  setValue,
   onChange,
   onClear,
+  selectedItems,
+  setSelectedItems,
 }: {
+  value: string;
+  setValue: Dispatch<SetStateAction<string>>;
   onChange: (value: string) => void;
-  onClear: () => void;
+  onClear?: () => void;
+  selectedItems: DDItemId[];
+  setSelectedItems: Dispatch<SetStateAction<DDItemId[]>>;
 }) => {
-  const [value, setValue] = useState<string>("");
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  function handleChange() {
+  function handleChange(a?: string) {
     if (!inputRef.current) return;
 
-    setValue(inputRef.current.value);
-    onChange?.(inputRef.current.value);
+    const inputValue = a ?? inputRef.current.value;
+
+    setValue(inputValue);
+    onChange?.(inputValue);
+  }
+
+  function handleClear() {
+    setSelectedItems([]);
+    onClear?.();
+    onChange?.(value);
   }
 
   return (
@@ -163,8 +198,11 @@ const SearchBar = ({
         )}
       </div>
       <button
-        className="px-2 text-sm text-[blue] underline"
-        onClick={() => onClear?.()}
+        className={classNames("px-2 text-sm text-[blue] underline", {
+          "opacity-50": selectedItems.length < 1,
+        })}
+        onClick={() => handleClear()}
+        disabled={selectedItems.length < 1}
       >
         Clear All
       </button>

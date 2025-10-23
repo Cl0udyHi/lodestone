@@ -1,6 +1,6 @@
 "use client";
 
-import SearchBar from "./searchbar/searchbar";
+import SearchBar from "./searchbar";
 import { createContext, Dispatch, SetStateAction, useState } from "react";
 import { ServerSearchQuery, Server } from "@/utils/types";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
