@@ -37,6 +37,8 @@ export default function Dropdown({
   const [searchValue, setSearchValue] = useState<string>("");
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  const listRef = useRef<HTMLUListElement | null>(null);
   const ref = useOutsideClick<HTMLDivElement>(() => handleOpen(false), isOpen);
 
   function handleOpen(bool?: boolean) {
@@ -47,6 +49,8 @@ export default function Dropdown({
 
     if (newState == false)
       setTimeout(() => {
+        listRef.current?.scrollTo({ top: 0, behavior: "instant" });
+
         setSearchValue("");
       }, 150);
   }
@@ -95,6 +99,7 @@ export default function Dropdown({
       </Button>
       <RemoveScroll enabled={isOpen}>
         <ul
+          ref={listRef}
           className={classNames(
             `min-w-full max-h-[calc(48px*5)] absolute left-0 top-[calc(100%+0.25rem)] bg-neutral-100 rounded-lg z-50 text-neutral-800 border border-neutral-300 transition-all duration-150 ease-in-out overflow-hidden`,
             "overflow-y-scroll scrollbar-hide",
@@ -199,7 +204,7 @@ const SearchBar = ({
       </div>
       <button
         className={classNames("px-2 text-sm text-[blue] underline", {
-          "opacity-50": selectedItems.length < 1,
+          "opacity-50 cursor-not-allowed": selectedItems.length < 1,
         })}
         onClick={() => handleClear()}
         disabled={selectedItems.length < 1}
