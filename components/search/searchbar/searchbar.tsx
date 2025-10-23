@@ -1,19 +1,31 @@
 "use client";
 
 import React, { useContext, useEffect, useState } from "react";
-import { SearchContext, TagsContext } from "../servers-section";
-import { useDebounce } from "@/utils/hooks";
+import { SearchQueryContext } from "../servers-section";
+import { useDebounce } from "@/utils/hooks/useDebounce";
 
-export default function SearchBar({ error }: { error: Error | null }) {
-  const setSearch = useContext(SearchContext)![1];
-  const [tags, setTags] = useContext(TagsContext)!;
+import SearchIcon from "@/public/assets/icons/search.svg";
+import CloseIcon from "@/public/assets/icons/close.svg";
+
+import Dropdown from "@/components/dropdown";
+import { ServerSearchQuery } from "@/utils/types";
+import { versions } from "@/utils/data";
+
+export default function SearchBar() {
+  const setSearchQuery = useContext(SearchQueryContext)![1];
 
   const [value, setValue] = useState<string>("");
-
   const debouncedSearch = useDebounce(value);
 
   useEffect(() => {
-    setSearch(debouncedSearch);
+    setSearchQuery((prev) => {
+      const newQuery: ServerSearchQuery = {
+        ...prev,
+        text: debouncedSearch,
+      };
+
+      return newQuery;
+    });
   }, [debouncedSearch]);
 
   return (
@@ -34,16 +46,7 @@ export default function SearchBar({ error }: { error: Error | null }) {
             name="reset"
             className="w-10 h-10 p-2 rounded-full m-2"
           >
-            <svg
-              className="fill-neutral-700 h-6"
-              xmlns="http://www.w3.org/2000/svg"
-              height="24px"
-              viewBox="0 -960 960 960"
-              width="24px"
-              fill="#e3e3e3"
-            >
-              <path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z" />
-            </svg>
+            <CloseIcon className="fill-neutral-700 h-6" />
           </button>
         ) : (
           <button
@@ -51,22 +54,46 @@ export default function SearchBar({ error }: { error: Error | null }) {
             name="search"
             className="w-10 h-10 p-2 rounded-full m-2"
           >
-            <svg
-              className="fill-neutral-700 h-6"
-              xmlns="http://www.w3.org/2000/svg"
-              height="24px"
-              viewBox="0 -960 960 960"
-              width="24px"
-              fill="#e3e3e3"
-            >
-              <path d="M380-320q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l224 224q11 11 11 28t-11 28q-11 11-28 11t-28-11L532-372q-30 24-69 38t-83 14Zm0-80q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" />
-            </svg>
+            <SearchIcon className="fill-neutral-700 h-6" />
           </button>
         )}
 
         {/* <SuggestedTags /> */}
       </div>
-      <div className="flex gap-1 flex-wrap">
+
+      <div className="flex gap-2 flex-wrap">
+        <Dropdown
+          name="Platform"
+          items={[
+            { id: 0, label: "Java Edition" },
+            { id: 1, label: "Bedrock Edition" },
+          ]}
+        />
+
+        <Dropdown
+          name="Supported Versions"
+          items={versions.map((version, index) => ({
+            id: index,
+            label: version,
+          }))}
+          search
+        />
+      </div>
+
+      {/* <div className="flex gap-1 flex-wrap">
+        <button className="flex gap-1 text-neutral-800 pl-2 pr-4 py-1 items-center hover:bg-neutral-300 bg-neutral-200 transition-colors rounded-full">
+          <svg
+            className="fill-neutral-700 h-5"
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            fill="#e3e3e3"
+          >
+            <path d="M856-390 570-104q-12 12-27 18t-30 6q-15 0-30-6t-27-18L103-457q-11-11-17-25.5T80-513v-287q0-33 23.5-56.5T160-880h287q16 0 31 6.5t26 17.5l352 353q12 12 17.5 27t5.5 30q0 15-5.5 29.5T856-390ZM513-160l286-286-353-354H160v286l353 354ZM260-640q25 0 42.5-17.5T320-700q0-25-17.5-42.5T260-760q-25 0-42.5 17.5T200-700q0 25 17.5 42.5T260-640Zm220 160Z" />
+          </svg>
+          Add Tags
+        </button>
         {tags.length > 1 && (
           <button
             onClick={() => {
@@ -87,37 +114,13 @@ export default function SearchBar({ error }: { error: Error | null }) {
             Clear All
           </button>
         )}
+
+        <div className="border-1 border-neutral-200 my-1 mx-2"></div>
+
         {tags.map((tag, index) => {
           return <Tag key={index} name={tag} />;
         })}
-      </div>
+      </div> */}
     </div>
   );
 }
-
-const Tag = ({ name }: { name: string }) => {
-  const [tags, setTags] = useContext(TagsContext)!;
-
-  function removeTag() {
-    setTags(tags.filter((tag) => tag !== name));
-  }
-
-  return (
-    <button
-      onClick={removeTag}
-      className="flex gap-1 text-neutral-800 pl-2 pr-4 py-1 items-center hover:bg-neutral-300 bg-neutral-200 transition-colors rounded-full"
-    >
-      <svg
-        className="fill-neutral-700 h-5"
-        xmlns="http://www.w3.org/2000/svg"
-        height="24px"
-        viewBox="0 -960 960 960"
-        width="24px"
-        fill="#e3e3e3"
-      >
-        <path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z" />
-      </svg>
-      {name}
-    </button>
-  );
-};
