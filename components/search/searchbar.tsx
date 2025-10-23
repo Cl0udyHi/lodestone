@@ -100,25 +100,44 @@ export default function SearchBar() {
         {/* <SuggestedTags /> */}
       </div>
 
-      <div className="flex gap-2 flex-wrap">
-        <Dropdown
-          name="Platform"
-          items={[
-            { id: 0, label: "Java Edition" },
-            { id: 1, label: "Bedrock Edition" },
-          ]}
-          onSelect={(selectedItems) => handlePlatform(selectedItems)}
-        />
+      <div className="flex justify-between">
+        <div className="flex gap-2 flex-wrap">
+          <Dropdown
+            name="Platform"
+            items={[
+              { id: 0, label: "Java Edition" },
+              { id: 1, label: "Bedrock Edition" },
+            ]}
+            onSelect={(selectedItems) => handlePlatform(selectedItems)}
+          />
 
-        <Dropdown
-          name="Supported Versions"
-          items={versions.map((version, index) => ({
-            id: index,
-            label: version,
-          }))}
-          search
-          onSelect={(selectedItems) => handleSupportedVersions(selectedItems)}
-        />
+          <Dropdown
+            name="Supported Versions"
+            items={versions.map((version, index) => ({
+              id: index,
+              label: version,
+            }))}
+            search
+            onSelect={(selectedItems) => handleSupportedVersions(selectedItems)}
+          />
+        </div>
+
+        <div className="flex gap-2 flex-wrap">
+          <Dropdown
+            name="Sort by"
+            items={[
+              "Most Players",
+              "Least Players",
+              "Most Rating",
+              "Least Rating",
+            ].map((_, index) => ({
+              id: index,
+              label: _,
+            }))}
+            position="RIGHT"
+            // onSelect={(selectedItems) => handleSupportedVersions(selectedItems)}
+          />
+        </div>
       </div>
 
       {/* <div className="flex gap-1 flex-wrap">

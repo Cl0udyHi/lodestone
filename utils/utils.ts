@@ -23,10 +23,7 @@ const filterServers = (query: ServerSearchQuery) => {
   // Filter with platform - server must have EXACTLY these platforms
   if (platforms && platforms.length > 0) {
     list = list.filter((server) => {
-      return (
-        server.platforms.length === platforms.length &&
-        platforms.every((platform) => server.platforms.includes(platform))
-      );
+      return platforms.every((platform) => server.platforms.includes(platform));
     });
   }
 

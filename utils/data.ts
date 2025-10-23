@@ -84,6 +84,7 @@ export const Tags: string[] = [
   "prison",
   "kitpvp",
   "towny",
+  "Requires Resourcepack",
 ];
 
 export const platforms: string[] = ["Java Edition", "Bedrock Edition"];
