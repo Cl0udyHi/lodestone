@@ -11,6 +11,8 @@ export type Server = {
   bannerUrl?: string;
   supportedVersions: string[];
   platforms: string[];
+  playerCount: number;
+  rating: number;
 };
 
 export type ServerSearchQuery = {
@@ -18,27 +20,25 @@ export type ServerSearchQuery = {
   platforms: string[];
   versions: string[];
   tags: string[];
+  sort: { [k: string]: SearchSort };
 };
 
-export type DDItemId = string | number;
-export type DDItem = { id: DDItemId; label: string; selected?: boolean };
+export type SearchSort = "most" | "least";
+
+export type DDItem = { id: string; label: string; selected?: boolean };
 
 export const makeSection = (
-  id: number | string,
+  id: string,
   type: "multiple" | "select",
   items: DDItem[]
 ): DDSection => new DDSection(id, type, items);
 
 export class DDSection {
-  id: number | string;
+  id: string;
   type: "multiple" | "select";
   items: DDItem[];
 
-  constructor(
-    id: number | string,
-    type: "multiple" | "select",
-    items: DDItem[]
-  ) {
+  constructor(id: string, type: "multiple" | "select", items: DDItem[]) {
     this.id = id;
     this.type = type;
     this.items = items;
@@ -48,7 +48,11 @@ export class DDSection {
     return this.items.filter((i) => i.selected).map((i) => i.label);
   }
 
-  getSelectedIds(): (string | number)[] {
+  getSelectedItems(): DDItem[] {
+    return this.items.filter((i) => i.selected);
+  }
+
+  getSelectedIds(): string[] {
     return this.items.filter((i) => i.selected).map((i) => i.id);
   }
 

@@ -9,7 +9,6 @@ import PVPLBanner from "@/public/assets/images/pvplegacy/banner.png";
 import PVPLIcon from "@/public/assets/images/pvplegacy/logo.png";
 
 export const Servers: Server[] = [
-  // DEMO data
   {
     id: "0",
     name: "Hypixel",
@@ -22,6 +21,8 @@ export const Servers: Server[] = [
     bannerUrl: hypixelBanner.src,
     supportedVersions: ["1.8.9", "1.21.10"],
     platforms: ["Java Edition"],
+    playerCount: 120000,
+    rating: 4.9,
   },
   {
     id: "1",
@@ -35,6 +36,8 @@ export const Servers: Server[] = [
     bannerUrl: cubeBanner.src,
     supportedVersions: ["1.16.5", "1.21.10"],
     platforms: ["Java Edition", "Bedrock Edition"],
+    playerCount: 45000,
+    rating: 4.5,
   },
   {
     id: "2",
@@ -48,6 +51,8 @@ export const Servers: Server[] = [
     bannerUrl: PVPLBanner.src,
     supportedVersions: ["1.21.8"],
     platforms: ["Java Edition"],
+    playerCount: 18000,
+    rating: 4.2,
   },
   {
     id: "3",
@@ -58,6 +63,8 @@ export const Servers: Server[] = [
     tags: ["testing", "development"],
     supportedVersions: ["1.21.10"],
     platforms: ["Java Edition"],
+    playerCount: 3,
+    rating: 3.8,
   },
 ];
 

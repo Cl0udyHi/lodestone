@@ -2,7 +2,7 @@ import { Servers, Tags } from "./data";
 import { ServerSearchQuery } from "./types";
 
 const filterServers = (query: ServerSearchQuery) => {
-  const { text, platforms, tags, versions } = query;
+  const { text, platforms, tags, versions, sort } = query;
 
   let list = Servers;
 
@@ -41,6 +41,21 @@ const filterServers = (query: ServerSearchQuery) => {
     list = list.filter((server) => {
       return tags.every((tag) => server.tags?.includes(tag));
     });
+  }
+
+  // Sort by Players
+  if (sort) {
+    if (sort.players === "most") {
+      list = list.sort((a, b) => b.playerCount - a.playerCount);
+    } else if (sort.players === "least") {
+      list = list.sort((a, b) => a.playerCount - b.playerCount);
+    }
+
+    if (sort.ratings === "most") {
+      list = list.sort((a, b) => b.rating - a.rating);
+    } else if (sort.rating === "least") {
+      list = list.sort((a, b) => a.rating - b.rating);
+    }
   }
 
   return list;
