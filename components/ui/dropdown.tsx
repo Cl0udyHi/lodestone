@@ -1,13 +1,5 @@
-import {
-  ChangeEvent,
-  Dispatch,
-  SetStateAction,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { Button } from "./ui/button";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { Button } from "../shadcn-ui/button";
 import classNames from "classnames";
 
 import ArrowIcon from "@/public/assets/icons/arrow_dropdown.svg";
@@ -25,7 +17,7 @@ interface Dropdown {
   onSelect?: (selectedItems: DDItemId[], items: DDItem[]) => void;
   onOpen?: (isOpen: boolean) => void;
   search?: boolean;
-  position?: "LEFT" | "RIGHT";
+  position?: "LEFT" | "CENTER" | "RIGHT";
 }
 
 export default function Dropdown({
@@ -103,9 +95,10 @@ export default function Dropdown({
         <ul
           ref={listRef}
           className={classNames(
-            `min-w-full max-h-[calc(48px*5)] absolute top-[calc(100%+0.25rem)] bg-neutral-100 rounded-lg z-50 text-neutral-800 border border-neutral-300 transition-all duration-150 ease-in-out overflow-hidden`,
+            `w-fit max-h-[calc(48px*5)] absolute top-[calc(100%+0.25rem)] bg-neutral-100 rounded-lg z-50 text-neutral-800 border border-neutral-300 transition-all duration-150 ease-in-out overflow-hidden`,
             "overflow-y-scroll scrollbar-hide",
             { "left-0 right-auto": position == "LEFT" },
+            { "left-1/2 -translate-x-1/2": position == "CENTER" },
             { "right-0 left-auto": position == "RIGHT" },
             { "opacity-0 pointer-events-none -translate-y-2": !isOpen }
           )}

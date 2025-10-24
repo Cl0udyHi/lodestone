@@ -4,7 +4,6 @@ import "./globals.css";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { Toaster } from "sonner";
-import classNames from "classnames";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -25,11 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={classNames(`${poppins.className} antialiased`, {
-          "overflow-hidden mr-[15px]": false,
-        })}
-      >
+      <body className={`${poppins.className} antialiased`}>
         <Navbar />
         <main>{children}</main>
         <Footer />

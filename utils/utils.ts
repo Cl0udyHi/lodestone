@@ -30,7 +30,7 @@ const filterServers = (query: ServerSearchQuery) => {
   // Filter with version - server must support at least one selected version
   if (versions && versions.length > 0) {
     list = list.filter((server) => {
-      return versions.some((version) =>
+      return versions.every((version) =>
         server.supportedVersions.includes(version)
       );
     });
