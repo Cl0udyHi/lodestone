@@ -8,17 +8,13 @@ import {
   useEffect,
   useState,
 } from "react";
-import {
-  DDSection,
-  makeSection,
-  SearchSort,
-  ServerSearchQuery,
-} from "@/utils/types";
+import { makeSection, SearchSort, ServerSearchQuery } from "@/utils/types";
 import { useServers } from "@/utils/hooks/useServers";
 import ServerCard from "./server-card";
 import Searchbar from "../ui/searchbar";
 import Dropdown from "../ui/dropdown";
 import { PLATFORMS, VERSIONS } from "@/utils/constants";
+import { TAGS } from "@/utils/data";
 
 export const SearchQueryContext = createContext<
   [ServerSearchQuery, Dispatch<SetStateAction<ServerSearchQuery>>] | null
@@ -47,7 +43,7 @@ function Content() {
 
         <div className="grid grid-cols-2 grid-rows-10 gap-4">
           {isPending ? (
-            <SuspenseServers />
+            <ServersSkeleton />
           ) : (
             servers?.map((server, index) => {
               return <ServerCard key={index} server={server} />;
@@ -59,7 +55,7 @@ function Content() {
   );
 }
 
-const SuspenseServers = () => {
+const ServersSkeleton = () => {
   return (
     <>
       {[...Array(20)].map((_, index) => (
@@ -79,6 +75,7 @@ const SearchSection = () => {
   const [versionsValue, setVersionsValue] = useState<string[]>([]);
   const [platformValue, setPlatformValue] = useState<string[]>([]);
   const [sortValue, setSortValue] = useState<{ [k: string]: SearchSort }>({});
+  const [tags, setTags] = useState<string[]>([]);
 
   useEffect(() => {
     setSearchQuery((prev) => {
@@ -88,11 +85,12 @@ const SearchSection = () => {
         versions: versionsValue,
         platforms: platformValue,
         sort: sortValue,
+        tags: tags,
       };
 
       return newQuery;
     });
-  }, [searchValue, versionsValue, platformValue, sortValue]);
+  }, [searchValue, versionsValue, platformValue, sortValue, tags]);
 
   return (
     <div className="flex flex-col gap-2">
@@ -147,6 +145,28 @@ const SearchSection = () => {
 
         <div className="flex gap-2 flex-wrap">
           <Dropdown
+            name="Tags"
+            sections={[
+              makeSection(
+                "tags",
+                "multiple",
+                TAGS.map((tag, index) => ({
+                  id: index.toString(),
+                  label: tag,
+                }))
+              ),
+            ]}
+            onSelect={(selectedItems) => {
+              setTags(
+                selectedItems.flatMap((section) =>
+                  section.items
+                    .filter((item) => item.selected)
+                    .map((item) => item.label)
+                )
+              );
+            }}
+          />
+          <Dropdown
             name="Sort by"
             sections={[
               makeSection("players", "select", [
@@ -182,7 +202,6 @@ const SearchSection = () => {
 
               setSortValue(sort);
             }}
-            position="RIGHT"
           />
         </div>
       </div>

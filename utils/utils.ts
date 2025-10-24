@@ -1,4 +1,4 @@
-import { Servers, Tags } from "./data";
+import { Servers, TAGS } from "./data";
 import { ServerSearchQuery } from "./types";
 
 const filterServers = (query: ServerSearchQuery) => {
@@ -69,7 +69,7 @@ export async function fetchServers(query: ServerSearchQuery) {
 
 function filterTags(word: string, tags: string[]) {
   return word !== undefined
-    ? Tags.filter(
+    ? TAGS.filter(
         (tag) => tag.toLowerCase().includes(word) && !tags.includes(tag)
       )
     : [];
@@ -80,26 +80,26 @@ export async function fetchTags(word: string, tags: string[]) {
   return filterTags(word, tags);
 }
 
-export function AddTag(
-  tag: string,
-  tags: string[],
-  setTags: React.Dispatch<React.SetStateAction<string[]>>,
-  setSearch?: React.Dispatch<React.SetStateAction<string>>
-): boolean {
-  if (!tags.includes(tag)) {
-    setTags((prevTags) => [...prevTags, tag]);
-    setSearch?.((prev) => {
-      const words = prev.trim().split(/\s+/);
-      words.pop();
+// export function AddTag(
+//   tag: string,
+//   tags: string[],
+//   setTags: React.Dispatch<React.SetStateAction<string[]>>,
+//   setSearch?: React.Dispatch<React.SetStateAction<string>>
+// ): boolean {
+//   if (!tags.includes(tag)) {
+//     setTags((prevTags) => [...prevTags, tag]);
+//     setSearch?.((prev) => {
+//       const words = prev.trim().split(/\s+/);
+//       words.pop();
 
-      let result = words.join(" ");
-      if (words.length > 0) result += " ";
+//       let result = words.join(" ");
+//       if (words.length > 0) result += " ";
 
-      return result;
-    });
+//       return result;
+//     });
 
-    return true;
-  }
+//     return true;
+//   }
 
-  return false;
-}
+//   return false;
+// }

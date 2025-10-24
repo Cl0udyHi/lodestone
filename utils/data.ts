@@ -46,7 +46,7 @@ export const Servers: Server[] = [
       "PVP Legacy is a competitive Minecraft server focused on pure PvP gameplay, featuring practice arenas, duels, and ranked matchmaking. Known for its high-quality combat experience and active community.",
     ip: "play.pvplegacy.net",
     port: 25565,
-    tags: ["pvp", "kitpvp", "minigames", "community"],
+    tags: ["pvp", "kitpvp", "community"],
     iconUrl: PVPLIcon.src,
     bannerUrl: PVPLBanner.src,
     supportedVersions: ["1.21.8"],
@@ -68,7 +68,7 @@ export const Servers: Server[] = [
   },
 ];
 
-export const Tags: string[] = [
+export const TAGS: string[] = [
   // DEMO data
   "pvp",
   "skyblock",

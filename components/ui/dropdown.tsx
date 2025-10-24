@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Button } from "../shadcn-ui/button";
 import classNames from "classnames";
 
@@ -20,7 +20,6 @@ interface Dropdown {
   onSelect?: (selectedItems: DDSection[]) => void;
   onOpen?: (isOpen: boolean) => void;
   search?: boolean;
-  position?: "LEFT" | "CENTER" | "RIGHT";
 }
 
 export default function Dropdown({
@@ -29,12 +28,13 @@ export default function Dropdown({
   onSelect,
   onOpen,
   search,
-  position = "LEFT",
 }: Dropdown) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const listRef = useRef<HTMLUListElement | null>(null);
   const ref = useOutsideClick<HTMLDivElement>(() => handleOpen(false), isOpen);
+  const { position, horizontalShift } = useDropdownPosition(isOpen, ref);
+
   const searchBarRefs = useRef<SearchbarRef[]>([]);
 
   function registerRef(el: SearchbarRef | null, index: number) {
@@ -125,6 +125,38 @@ export default function Dropdown({
     );
   }
 
+  function useDropdownPosition(
+    isOpen: boolean,
+    ref: React.RefObject<HTMLElement>
+  ) {
+    const [position, setPosition] = useState<"top" | "bottom">("bottom");
+    const [horizontalShift, setHorizontalShift] = useState<
+      "left" | "right" | "center"
+    >("left");
+
+    useLayoutEffect(() => {
+      if (!isOpen || !ref.current) return;
+
+      const rect = ref.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
+
+      const spaceBelow = viewportHeight - rect.bottom;
+      const spaceAbove = rect.top;
+
+      if (spaceBelow < 200 && spaceAbove > spaceBelow) {
+        setPosition("top");
+      } else {
+        setPosition("bottom");
+      }
+
+      if (rect.left < 200) setHorizontalShift("left");
+      else if (viewportWidth - rect.right < 200) setHorizontalShift("right");
+    }, [isOpen]);
+
+    return { position, horizontalShift };
+  }
+
   return (
     <div ref={ref} className="relative">
       <Button
@@ -142,12 +174,15 @@ export default function Dropdown({
         <ul
           ref={listRef}
           className={classNames(
-            `w-fit max-h-[calc(48px*5)] absolute top-[calc(100%+0.25rem)] bg-neutral-100 rounded-lg z-50 text-neutral-800 border border-neutral-300 transition-all duration-150 ease-in-out overflow-hidden`,
+            `w-fit max-h-[calc(48px*5)] absolute bg-neutral-100 rounded-lg z-50 text-neutral-800 border border-neutral-600 transition-all duration-150 ease-in-out overflow-hidden`,
             "overflow-y-scroll scrollbar-hide",
-            { "left-0 right-auto": position == "LEFT" },
-            { "left-1/2 -translate-x-1/2": position == "CENTER" },
-            { "right-0 left-auto": position == "RIGHT" },
-            { "opacity-0 pointer-events-none -translate-y-2": !isOpen }
+            {
+              "top-[calc(100%+0.25rem)]": position === "bottom",
+              "bottom-[calc(100%+0.25rem)]": position === "top",
+              "left-0 right-auto": horizontalShift === "left",
+              "right-0 left-auto": horizontalShift === "right",
+              "opacity-0 pointer-events-none -translate-y-2": !isOpen,
+            }
           )}
         >
           {(search || sections.length > 10) && <Searchbar />}
