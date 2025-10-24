@@ -1,20 +1,23 @@
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../shadcn-ui/button";
 import classNames from "classnames";
 
 import ArrowIcon from "@/public/assets/icons/arrow_dropdown.svg";
 import CheckmarkIcon from "@/public/assets/icons/checkmark.svg";
-import SearchIcon from "@/public/assets/icons/search.svg";
-import CloseIcon from "@/public/assets/icons/close.svg";
+import RadioCheckedIcon from "@/public/assets/icons/radio_checked.svg";
+import RadioUnCheckedIcon from "@/public/assets/icons/radio_unchecked.svg";
 
 import { useOutsideClick } from "@/utils/hooks/useClickoutside";
-import { DDItem, DDItemId } from "@/utils/types";
+import { DDItem, DDItemId, DDSection } from "@/utils/types";
 import { RemoveScroll } from "react-remove-scroll";
+import Searchbar from "./searchbar";
+import { DEBOUNCE_DELAY } from "@/utils/constants";
+import { useDebounce } from "@uidotdev/usehooks";
 
 interface Dropdown {
   name: string;
-  items: DDItem[];
-  onSelect?: (selectedItems: DDItemId[], items: DDItem[]) => void;
+  sections: DDSection[];
+  onSelect?: (selectedItems: DDSection[]) => void;
   onOpen?: (isOpen: boolean) => void;
   search?: boolean;
   position?: "LEFT" | "CENTER" | "RIGHT";
@@ -22,14 +25,12 @@ interface Dropdown {
 
 export default function Dropdown({
   name,
-  items,
+  sections,
   onSelect,
   onOpen,
   search,
   position = "LEFT",
 }: Dropdown) {
-  const [searchValue, setSearchValue] = useState<string>("");
-
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const listRef = useRef<HTMLUListElement | null>(null);
@@ -43,46 +44,70 @@ export default function Dropdown({
 
     if (newState == false)
       setTimeout(() => {
-        listRef.current?.scrollTo({ top: 0, behavior: "instant" });
-
-        setSearchValue("");
+        listRef.current?.scrollTo({
+          top: 0,
+          behavior: "instant",
+        });
       }, 150);
   }
 
-  const [selectedItems, setSelectedItems] = useState<DDItemId[]>([]);
+  const [list, setList] = useState<DDSection[]>(sections);
 
-  function handleSelect(item?: DDItem) {
-    let newSelectedItems: DDItemId[] = !item
-      ? []
-      : selectedItems.includes(item.id)
-      ? selectedItems.filter((id) => id !== item.id)
-      : [...selectedItems, item.id];
+  const [selected, setSelected] = useState<DDSection[]>(sections);
+  const debouncedSelected = useDebounce(selected, DEBOUNCE_DELAY);
 
-    setSelectedItems(newSelectedItems);
-    onSelect?.(newSelectedItems, items);
-  }
+  function handleSelect(section: DDSection, item: DDItem) {
+    setSelected((prev) =>
+      prev.map((s) => {
+        if (s.type === section.type) {
+          if (section.type === "multiple") {
+            const updatedItems = s.items.map((i) =>
+              i.id === item.id ? { ...i, selected: !i.selected } : i
+            );
 
-  const [list, setList] = useState<DDItem[]>([]);
+            return new DDSection(s.id, s.type, updatedItems);
+          }
 
-  function updateItems(value: string) {
-    const words: string[] = value.toLowerCase().split(" ");
+          if (section.type === "select") {
+            const updatedItems = s.items.map((i) => ({
+              ...i,
+              selected: i.id === item.id,
+            }));
 
-    const list = items.filter((item) => {
-      return words.every((word) => item.label.toLowerCase().includes(word));
-    });
+            return new DDSection(s.id, s.type, updatedItems);
+          }
+        }
 
-    setList(list);
+        return s;
+      })
+    );
   }
 
   useEffect(() => {
-    updateItems("");
-  }, [items]);
+    onSelect?.(debouncedSelected);
+  }, [debouncedSelected]);
+
+  function searchSection(value: string, targetSection: DDSection) {
+    setList(
+      sections.map((section) => {
+        if (section.id === targetSection.id) {
+          const filteredItems = section.items.filter((item) =>
+            item.label.toLowerCase().includes(value.toLowerCase())
+          );
+
+          return new DDSection(section.id, section.type, filteredItems);
+        }
+
+        return section;
+      })
+    );
+  }
 
   return (
     <div ref={ref} className="relative">
       <Button
-        className="pl-4! bg-neutral-200 hover:bg-neutral-300 text-neutral-800 text-base rounded-full"
         onClick={() => handleOpen()}
+        className="pl-4! bg-neutral-200 hover:bg-neutral-300 text-neutral-800 text-base rounded-full"
       >
         {name}
         <ArrowIcon
@@ -103,111 +128,91 @@ export default function Dropdown({
             { "opacity-0 pointer-events-none -translate-y-2": !isOpen }
           )}
         >
-          {(search || items.length > 10) && (
-            <SearchBar
-              onChange={(value) => {
-                updateItems(value);
-              }}
-              onClear={() => handleSelect()}
-              value={searchValue}
-              setValue={setSearchValue}
-              selectedItems={selectedItems}
-              setSelectedItems={setSelectedItems}
-            />
-          )}
+          {(search || sections.length > 10) && <Searchbar />}
 
-          {list.map((item, index) => (
-            <li key={index}>
-              <button
-                onClick={() => handleSelect(item)}
-                className="flex justify-between gap-4 text-start w-full px-4 py-3 hover:bg-neutral-200 bg-neutral-100 text-base text-nowrap"
-              >
-                {item.label}
-                <CheckmarkIcon
-                  className={classNames("fill-neutral-800 w-5", {
-                    "opacity-0": !selectedItems?.includes(item.id),
+          {list.map((section, sectionIndex) => {
+            let items = section.items;
+
+            return (
+              <div key={section.id}>
+                <ul>
+                  {sections.find((sec) => sec.id == section.id)!.items.length >
+                    10 && (
+                    <div className="p-2 bg-neutral-100 sticky top-0">
+                      <Searchbar
+                        className="rounded-sm w-max [&>button,&>div]:m-0 [&>input]:p-2 [&>input]:pl-3"
+                        submitMethod="OnChange"
+                        submitKey=""
+                        onSubmit={(searchValue) =>
+                          searchSection(searchValue, section)
+                        }
+                      />
+                      {/* {section.type === "multiple" && (
+                        <button
+                          className={classNames(
+                            "px-2 text-sm text-[blue] underline",
+                            {
+                              "opacity-50 cursor-not-allowed":
+                                sections
+                                  .find((sec) => sec.id == section.id)!
+                                  .getSelectedIds().length < 1,
+                            }
+                          )}
+                          // onClick={() => handleClear()}
+                          disabled={
+                            sections
+                              .find((sec) => sec.id == section.id)!
+                              .getSelectedIds().length < 1
+                          }
+                        >
+                          Clear All
+                        </button>
+                      )} */}
+                    </div>
+                  )}
+
+                  {items.map((item, itemIndex) => {
+                    const isChecked =
+                      selected
+                        .find((sec) => sec.id == section.id)
+                        ?.items.find((i) => i.id == item.id)?.selected ?? false;
+
+                    return (
+                      <li key={item.id}>
+                        <label className="flex justify-between gap-4 w-full px-4 py-3 hover:bg-neutral-200 bg-neutral-100 text-base text-nowrap cursor-pointer">
+                          <input
+                            type={
+                              section.type == "multiple" ? "checkbox" : "radio"
+                            }
+                            name={section.id as string}
+                            value={item.id as string}
+                            className="peer hidden"
+                            checked={isChecked}
+                            onChange={() => handleSelect(section, item)}
+                          />
+                          {item.label}
+
+                          {section.type == "multiple" ? (
+                            <CheckmarkIcon className="opacity-0 peer-checked:opacity-100 fill-neutral-800 w-5" />
+                          ) : (
+                            <>
+                              <RadioCheckedIcon className="hidden peer-checked:block fill-neutral-800 w-5" />
+                              <RadioUnCheckedIcon className="block peer-checked:hidden fill-neutral-800 w-5" />
+                            </>
+                          )}
+                        </label>
+                      </li>
+                    );
                   })}
-                />
-              </button>
-            </li>
-          ))}
+                </ul>
+                {sectionIndex < list.length - 1 && (
+                  <hr className="my-1 mx-4 border-neutral-300" />
+                )}
+              </div>
+            );
+          })}
         </ul>
       </RemoveScroll>
     </div>
   );
 }
-
-const SearchBar = ({
-  value,
-  setValue,
-  onChange,
-  onClear,
-  selectedItems,
-  setSelectedItems,
-}: {
-  value: string;
-  setValue: Dispatch<SetStateAction<string>>;
-  onChange: (value: string) => void;
-  onClear?: () => void;
-  selectedItems: DDItemId[];
-  setSelectedItems: Dispatch<SetStateAction<DDItemId[]>>;
-}) => {
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
-  function handleChange(a?: string) {
-    if (!inputRef.current) return;
-
-    const inputValue = a ?? inputRef.current.value;
-
-    setValue(inputValue);
-    onChange?.(inputValue);
-  }
-
-  function handleClear() {
-    setSelectedItems([]);
-    onClear?.();
-    onChange?.(value);
-  }
-
-  return (
-    <div className="p-2 flex flex-col items-start gap-1 sticky top-0 bg-neutral-100">
-      <div className="group w-max flex outline outline-neutral-600 rounded-sm focus-within:outline-2">
-        <input
-          ref={inputRef}
-          value={value}
-          onChange={() => handleChange()}
-          className="max-w-full w-full pl-3 text-neutral-800 placeholder:text-neutral-500 focus:outline-0 rounded-full"
-          name="search"
-          placeholder="Search"
-          autoComplete="off"
-        />
-        {value.length > 0 ? (
-          <button
-            onClick={() => {
-              setValue("");
-              onChange?.("");
-            }}
-            type="button"
-            name="reset"
-            className="w-10 h-10 p-2 rounded-full"
-          >
-            <CloseIcon className="fill-neutral-700 h-6" />
-          </button>
-        ) : (
-          <div className="w-10 h-10 p-2 rounded-full">
-            <SearchIcon className="fill-neutral-700 h-6" />
-          </div>
-        )}
-      </div>
-      <button
-        className={classNames("px-2 text-sm text-[blue] underline", {
-          "opacity-50 cursor-not-allowed": selectedItems.length < 1,
-        })}
-        onClick={() => handleClear()}
-        disabled={selectedItems.length < 1}
-      >
-        Clear All
-      </button>
-    </div>
-  );
-};

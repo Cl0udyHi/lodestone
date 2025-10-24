@@ -1,4 +1,11 @@
-import { FormEvent, useEffect, useState } from "react";
+import {
+  Dispatch,
+  FormEvent,
+  Ref,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 
 import SearchIcon from "@/public/assets/icons/search.svg";
 import CloseIcon from "@/public/assets/icons/close.svg";
@@ -55,14 +62,13 @@ export default function Searchbar({
       }}
       className={classNames(
         className,
-        "group relative w-full flex outline outline-neutral-600 rounded-full focus-within:outline-2"
+        "group relative w-full flex outline outline-neutral-600 rounded-full focus-within:outline-2 overflow-hidden"
       )}
     >
       <input
         value={searchValue}
         onChange={(e) => setSearchValue(e.target.value)}
-        className="w-full pl-5 text-neutral-800 placeholder:text-neutral-500 py-3 focus:outline-0 rounded-full"
-        name="search"
+        className="w-full pl-5 text-neutral-800 placeholder:text-neutral-500 py-3 focus:outline-0"
         placeholder={placeHolder ?? "Search"}
         autoComplete="off"
       />
