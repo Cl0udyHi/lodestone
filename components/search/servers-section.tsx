@@ -1,11 +1,9 @@
 "use client";
 
-import SearchBar from "./searchbar";
 import {
   createContext,
   Dispatch,
   SetStateAction,
-  useCallback,
   useContext,
   useEffect,
   useState,
@@ -165,7 +163,6 @@ const SearchSection = () => {
             }))}
             search
             onSelect={(selectedItems) => handleSupportedVersions(selectedItems)}
-            position="CENTER"
           />
         </div>
 
