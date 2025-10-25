@@ -1,13 +1,17 @@
-import { Servers, Tags } from "./data";
+import { Servers, TAGS } from "./demo-data";
 import { ServerSearchQuery } from "./types";
 
 const filterServers = (query: ServerSearchQuery) => {
-  const { text, platforms, tags, versions } = query;
+  const { text, platforms, tags, versions, sort, serverId } = query;
+
+  if (serverId) {
+    return Servers.filter((s) => s.id == serverId)[0];
+  }
 
   let list = Servers;
 
   // Filter with text
-  if (text.length >= 1) {
+  if (text && text.length >= 1) {
     const words: string[] = text.trim().toLowerCase().split(/\s+/);
     list = list.filter((server) => {
       return words.every(
@@ -43,6 +47,21 @@ const filterServers = (query: ServerSearchQuery) => {
     });
   }
 
+  // Sort by Players
+  if (sort) {
+    if (sort.players === "most") {
+      list = list.sort((a, b) => b.playerCount - a.playerCount);
+    } else if (sort.players === "least") {
+      list = list.sort((a, b) => a.playerCount - b.playerCount);
+    }
+
+    if (sort.ratings === "most") {
+      list = list.sort((a, b) => b.rating - a.rating);
+    } else if (sort.rating === "least") {
+      list = list.sort((a, b) => a.rating - b.rating);
+    }
+  }
+
   return list;
 };
 
@@ -54,7 +73,7 @@ export async function fetchServers(query: ServerSearchQuery) {
 
 function filterTags(word: string, tags: string[]) {
   return word !== undefined
-    ? Tags.filter(
+    ? TAGS.filter(
         (tag) => tag.toLowerCase().includes(word) && !tags.includes(tag)
       )
     : [];
@@ -65,26 +84,26 @@ export async function fetchTags(word: string, tags: string[]) {
   return filterTags(word, tags);
 }
 
-export function AddTag(
-  tag: string,
-  tags: string[],
-  setTags: React.Dispatch<React.SetStateAction<string[]>>,
-  setSearch?: React.Dispatch<React.SetStateAction<string>>
-): boolean {
-  if (!tags.includes(tag)) {
-    setTags((prevTags) => [...prevTags, tag]);
-    setSearch?.((prev) => {
-      const words = prev.trim().split(/\s+/);
-      words.pop();
+// export function AddTag(
+//   tag: string,
+//   tags: string[],
+//   setTags: React.Dispatch<React.SetStateAction<string[]>>,
+//   setSearch?: React.Dispatch<React.SetStateAction<string>>
+// ): boolean {
+//   if (!tags.includes(tag)) {
+//     setTags((prevTags) => [...prevTags, tag]);
+//     setSearch?.((prev) => {
+//       const words = prev.trim().split(/\s+/);
+//       words.pop();
 
-      let result = words.join(" ");
-      if (words.length > 0) result += " ";
+//       let result = words.join(" ");
+//       if (words.length > 0) result += " ";
 
-      return result;
-    });
+//       return result;
+//     });
 
-    return true;
-  }
+//     return true;
+//   }
 
-  return false;
-}
+//   return false;
+// }
