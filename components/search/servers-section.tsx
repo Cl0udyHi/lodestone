@@ -8,14 +8,13 @@ import {
   useEffect,
   useState,
 } from "react";
-import { DDItemId, ServerSearchQuery } from "@/utils/types";
+import { makeSection, SearchSort, ServerSearchQuery } from "@/utils/types";
 import { useServers } from "@/utils/hooks/useServers";
 import ServerCard from "./server-card";
 import Searchbar from "../ui/searchbar";
 import Dropdown from "../ui/dropdown";
-import { useDebounce } from "@uidotdev/usehooks";
-import { DEBOUNCE_DELAY } from "@/utils/constants";
-import { platforms, versions } from "@/utils/data";
+import { PLATFORMS, VERSIONS } from "@/utils/constants";
+import { TAGS } from "@/utils/demo-data";
 
 export const SearchQueryContext = createContext<
   [ServerSearchQuery, Dispatch<SetStateAction<ServerSearchQuery>>] | null
@@ -31,6 +30,7 @@ function Content() {
     platforms: [],
     tags: [],
     versions: [],
+    sort: {},
   });
 
   const { data: servers, error, isPending } = useServers(searchQuery);
@@ -43,7 +43,7 @@ function Content() {
 
         <div className="grid grid-cols-2 grid-rows-10 gap-4">
           {isPending ? (
-            <SuspenseServers />
+            <ServersSkeleton />
           ) : (
             servers?.map((server, index) => {
               return <ServerCard key={index} server={server} />;
@@ -55,7 +55,7 @@ function Content() {
   );
 }
 
-const SuspenseServers = () => {
+const ServersSkeleton = () => {
   return (
     <>
       {[...Array(20)].map((_, index) => (
@@ -71,114 +71,147 @@ const SuspenseServers = () => {
 const SearchSection = () => {
   const setSearchQuery = useContext(SearchQueryContext)![1];
 
-  function handleSearch(value: string) {
-    setSearchQuery((prev) => {
-      const newQuery: ServerSearchQuery = {
-        ...prev,
-        text: value,
-        // versions: debouncedVersions,
-        // platforms: debouncedPlatform,
-      };
-
-      return newQuery;
-    });
-  }
-
-  const [value, setValue] = useState<string>("");
-  const debouncedSearch = useDebounce(value, DEBOUNCE_DELAY);
-
-  const [selectedVersions, setSelectedVersions] = useState<string[]>([]);
-  const debouncedVersions = useDebounce(selectedVersions, DEBOUNCE_DELAY);
-
-  function handleSupportedVersions(selectedItems: DDItemId[]) {
-    setSelectedVersions(() => {
-      const list = versions.map((version, index) => ({
-        id: index,
-        label: version,
-      }));
-
-      const selectedVersionStrings = list
-        .filter((item) => selectedItems.includes(item.id))
-        .map((item) => item.label);
-
-      return selectedVersionStrings;
-    });
-  }
-
-  const [selectedPlatform, setSelectedPlatform] = useState<string[]>([]);
-  const debouncedPlatform = useDebounce(selectedPlatform, DEBOUNCE_DELAY);
-
-  function handlePlatform(selectedItems: DDItemId[]) {
-    setSelectedPlatform(() => {
-      const list = platforms.map((p, index) => ({
-        id: index,
-        label: p,
-      }));
-
-      const selectedPlatforms = list
-        .filter((item) => selectedItems.includes(item.id))
-        .map((item) => item.label);
-
-      return selectedPlatforms;
-    });
-  }
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [versionsValue, setVersionsValue] = useState<string[]>([]);
+  const [platformValue, setPlatformValue] = useState<string[]>([]);
+  const [sortValue, setSortValue] = useState<{ [k: string]: SearchSort }>({});
+  const [tagsValue, setTagsValue] = useState<string[]>([]);
 
   useEffect(() => {
     setSearchQuery((prev) => {
       const newQuery: ServerSearchQuery = {
         ...prev,
-        text: debouncedSearch,
-        versions: debouncedVersions,
-        platforms: debouncedPlatform,
+        text: searchValue,
+        versions: versionsValue,
+        platforms: platformValue,
+        sort: sortValue,
+        tags: tagsValue,
       };
 
       return newQuery;
     });
-  }, [debouncedSearch, debouncedVersions, debouncedPlatform]);
+  }, [searchValue, versionsValue, platformValue, sortValue, tagsValue]);
+
+  const platforms = [
+    makeSection(
+      "platforms",
+      "multiple",
+      PLATFORMS.map((platform, index) => ({
+        id: index.toString(),
+        label: platform,
+      }))
+    ),
+  ];
+
+  const versions = [
+    makeSection(
+      "versions",
+      "multiple",
+      VERSIONS.map((version, index) => ({
+        id: index.toString(),
+        label: version,
+      }))
+    ),
+  ];
+
+  const sort = [
+    makeSection("players", "select", [
+      {
+        id: "most",
+        label: "Most Players",
+        selected: true,
+      },
+      {
+        id: "least",
+        label: "Least Players",
+      },
+    ]),
+    makeSection("ratings", "select", [
+      {
+        id: "most",
+        label: "Most Rating",
+        selected: true,
+      },
+      {
+        id: "least",
+        label: "Least Rating",
+      },
+    ]),
+  ];
+
+  const tags = [
+    makeSection(
+      "tags",
+      "multiple",
+      TAGS.map((tag, index) => ({
+        id: index.toString(),
+        label: tag,
+      }))
+    ),
+  ];
 
   return (
     <div className="flex flex-col gap-2">
       <Searchbar
         placeHolder="Type server name or IP (e.g. 'Survival', 'PvP', 'server.xyz')"
         submitMethod="onDebounce"
-        onSubmit={(value) => handleSearch(value)}
+        onSubmit={(value) => setSearchValue(value)}
       />
 
       <div className="flex justify-between">
         <div className="flex gap-2 flex-wrap">
           <Dropdown
-            name="Platform"
-            items={[
-              { id: 0, label: "Java Edition" },
-              { id: 1, label: "Bedrock Edition" },
-            ]}
-            onSelect={(selectedItems) => handlePlatform(selectedItems)}
+            name="Platforms"
+            sections={platforms}
+            onSelect={(selectedItems) => {
+              const platformSection = selectedItems.find(
+                (sec) => sec.id === "platforms"
+              );
+
+              if (platformSection) {
+                setPlatformValue(platformSection.getSelectedLabels());
+              }
+            }}
           />
 
           <Dropdown
-            name="Supported Versions"
-            items={versions.map((version, index) => ({
-              id: index,
-              label: version,
-            }))}
-            search
-            onSelect={(selectedItems) => handleSupportedVersions(selectedItems)}
+            name="Versions"
+            sections={versions}
+            onSelect={(selectedItems) =>
+              setVersionsValue(selectedItems[0].getSelectedLabels())
+            }
           />
         </div>
 
         <div className="flex gap-2 flex-wrap">
           <Dropdown
+            name="Tags"
+            sections={tags}
+            onSelect={(selectedItems) => {
+              setTagsValue(
+                selectedItems.flatMap((section) =>
+                  section.items
+                    .filter((item) => item.selected)
+                    .map((item) => item.label)
+                )
+              );
+            }}
+            placement="bottom-end"
+          />
+          <Dropdown
             name="Sort by"
-            items={[
-              "Most Players",
-              "Least Players",
-              "Most Rating",
-              "Least Rating",
-            ].map((_, index) => ({
-              id: index,
-              label: _,
-            }))}
-            position="RIGHT"
+            sections={sort}
+            onSelect={(selectedSections) => {
+              const sort = Object.fromEntries(
+                selectedSections.map((section) => [
+                  section.id,
+                  section.getSelectedItems()[0]?.id as SearchSort,
+                ])
+              );
+
+              setSortValue(sort);
+            }}
+            placement="bottom-end"
           />
         </div>
       </div>

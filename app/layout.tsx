@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { Toaster } from "sonner";
+import QueryProvider from "@/components/providers/query-provider";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -24,11 +25,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.className} antialiased`}>
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
-        <Toaster />
+      <body className={`${poppins.className} antialiased overflow-x-hidden`}>
+        <QueryProvider>
+          <Navbar />
+          <main>{children}</main>
+          <Footer />
+          <Toaster />
+        </QueryProvider>
       </body>
     </html>
   );
