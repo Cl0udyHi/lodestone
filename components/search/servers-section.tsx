@@ -8,7 +8,12 @@ import {
   useEffect,
   useState,
 } from "react";
-import { makeSection, SearchSort, ServerSearchQuery } from "@/utils/types";
+import {
+  makeSection,
+  SearchSort,
+  Server,
+  ServerSearchQuery,
+} from "@/utils/types";
 import { useServers } from "@/utils/hooks/useServers";
 import ServerCard from "./server-card";
 import Searchbar from "../ui/searchbar";
@@ -33,7 +38,8 @@ function Content() {
     sort: {},
   });
 
-  const { data: servers, error, isPending } = useServers(searchQuery);
+  const { data, error, isPending } = useServers(searchQuery);
+  const servers: Server[] = Array.isArray(data) ? data : data ? [data] : [];
 
   return (
     <section className="w-full min-h-screen bg-neutral-100 px-16 py-8 flex flex-col gap-5">
