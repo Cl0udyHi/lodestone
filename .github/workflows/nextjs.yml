@@ -34,6 +34,8 @@ jobs:
       - name: Detect package manager
         id: detect-package-manager
         run: |
+          set -x
+          NODE_ENV=production NEXT_TELEMETRY_DEBUG=1 next build
           if [ -f "${{ github.workspace }}/yarn.lock" ]; then
             echo "manager=yarn" >> $GITHUB_OUTPUT
             echo "command=install" >> $GITHUB_OUTPUT
