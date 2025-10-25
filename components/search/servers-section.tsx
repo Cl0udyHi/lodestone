@@ -30,13 +30,7 @@ export default function ServersSection() {
 }
 
 function Content() {
-  const [searchQuery, setSearchQuery] = useState<ServerSearchQuery>({
-    text: "",
-    platforms: [],
-    tags: [],
-    versions: [],
-    sort: {},
-  });
+  const [searchQuery, setSearchQuery] = useState<ServerSearchQuery>({});
 
   const { data, error, isPending } = useServers(searchQuery);
   const servers: Server[] = Array.isArray(data) ? data : data ? [data] : [];
@@ -47,15 +41,19 @@ function Content() {
       <SearchQueryContext.Provider value={[searchQuery, setSearchQuery]}>
         <SearchSection />
 
-        <div className="grid grid-cols-2 grid-rows-10 gap-4">
-          {isPending ? (
-            <ServersSkeleton />
-          ) : (
-            servers?.map((server, index) => {
-              return <ServerCard key={index} server={server} />;
-            })
-          )}
-        </div>
+        {error ? (
+          <h1>An error has occurred: {error.message}</h1>
+        ) : (
+          <div className="grid grid-cols-2 grid-rows-10 gap-4">
+            {isPending ? (
+              <ServersSkeleton />
+            ) : (
+              servers?.map((server, index) => {
+                return <ServerCard key={index} server={server} />;
+              })
+            )}
+          </div>
+        )}
       </SearchQueryContext.Provider>
     </section>
   );
