@@ -1,5 +1,13 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Button } from "../shadcn-ui/button";
+import { Button } from "./shadcn-ui/button";
+import {
+  useFloating,
+  offset,
+  flip,
+  shift,
+  autoUpdate,
+  Placement,
+} from "@floating-ui/react";
 import classNames from "classnames";
 
 import ArrowIcon from "@/public/assets/icons/arrow_dropdown.svg";
@@ -20,6 +28,7 @@ interface Dropdown {
   onSelect?: (selectedItems: DDSection[]) => void;
   onOpen?: (isOpen: boolean) => void;
   search?: boolean;
+  placement?: Placement;
 }
 
 export default function Dropdown({
@@ -28,6 +37,7 @@ export default function Dropdown({
   onSelect,
   onOpen,
   search,
+  placement = "bottom-start",
 }: Dropdown) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -36,6 +46,26 @@ export default function Dropdown({
   const { position, horizontalShift } = useDropdownPosition(isOpen, ref);
 
   const searchBarRefs = useRef<SearchbarRef[]>([]);
+
+  const {
+    refs,
+    floatingStyles,
+    placement: currentPlacement,
+  } = useFloating({
+    open: isOpen,
+    onOpenChange: setIsOpen,
+    placement,
+    middleware: [
+      offset(8),
+      flip({
+        fallbackPlacements: placement.includes("end")
+          ? ["top-end", "bottom-end"]
+          : ["top-start", "bottom-start"],
+      }),
+      shift({ padding: 8 }),
+    ],
+    whileElementsMounted: autoUpdate,
+  });
 
   function registerRef(el: SearchbarRef | null, index: number) {
     if (el) searchBarRefs.current[index] = el;
@@ -160,6 +190,7 @@ export default function Dropdown({
   return (
     <div ref={ref} className="relative">
       <Button
+        ref={refs.setReference}
         onClick={() => handleOpen()}
         className="pl-4! bg-neutral-200 hover:bg-neutral-300 text-neutral-800 text-base rounded-full"
       >
@@ -172,21 +203,17 @@ export default function Dropdown({
       </Button>
       <RemoveScroll enabled={isOpen}>
         <ul
-          ref={listRef}
+          ref={refs.setFloating}
+          style={floatingStyles}
+          data-placement={placement}
           className={classNames(
-            `w-fit max-h-[calc(48px*5)] absolute bg-neutral-100 rounded-lg z-50 text-neutral-800 border border-neutral-600 transition-all duration-150 ease-in-out overflow-hidden`,
-            "overflow-y-scroll scrollbar-hide",
+            "w-fit max-h-[calc(48px*5)] bg-neutral-100 rounded-lg z-50 text-neutral-800 border border-neutral-600 transition-all duration-150 ease-in-out overflow-y-scroll scrollbar-hide shadow-lg",
             {
-              "top-[calc(100%+0.25rem)]": position === "bottom",
-              "bottom-[calc(100%+0.25rem)]": position === "top",
-              "left-0 right-auto": horizontalShift === "left",
-              "right-0 left-auto": horizontalShift === "right",
-              "opacity-0 pointer-events-none -translate-y-2": !isOpen,
+              "opacity-0 pointer-events-none scale-95": !isOpen,
+              "opacity-100 scale-100": isOpen,
             }
           )}
         >
-          {(search || sections.length > 10) && <Searchbar />}
-
           {list.map((section, sectionIndex) => {
             let items = section.items;
 

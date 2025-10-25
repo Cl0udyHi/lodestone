@@ -16,11 +16,12 @@ export type Server = {
 };
 
 export type ServerSearchQuery = {
-  text: string;
-  platforms: string[];
-  versions: string[];
-  tags: string[];
-  sort: { [k: string]: SearchSort };
+  serverId?: string;
+  text?: string;
+  platforms?: string[];
+  versions?: string[];
+  tags?: string[];
+  sort?: { [k: string]: SearchSort };
 };
 
 export type SearchSort = "most" | "least";

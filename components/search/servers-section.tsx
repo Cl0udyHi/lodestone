@@ -14,7 +14,7 @@ import ServerCard from "./server-card";
 import Searchbar from "../ui/searchbar";
 import Dropdown from "../ui/dropdown";
 import { PLATFORMS, VERSIONS } from "@/utils/constants";
-import { TAGS } from "@/utils/data";
+import { TAGS } from "@/utils/demo-data";
 
 export const SearchQueryContext = createContext<
   [ServerSearchQuery, Dispatch<SetStateAction<ServerSearchQuery>>] | null
@@ -75,7 +75,7 @@ const SearchSection = () => {
   const [versionsValue, setVersionsValue] = useState<string[]>([]);
   const [platformValue, setPlatformValue] = useState<string[]>([]);
   const [sortValue, setSortValue] = useState<{ [k: string]: SearchSort }>({});
-  const [tags, setTags] = useState<string[]>([]);
+  const [tagsValue, setTagsValue] = useState<string[]>([]);
 
   useEffect(() => {
     setSearchQuery((prev) => {
@@ -85,12 +85,70 @@ const SearchSection = () => {
         versions: versionsValue,
         platforms: platformValue,
         sort: sortValue,
-        tags: tags,
+        tags: tagsValue,
       };
 
       return newQuery;
     });
-  }, [searchValue, versionsValue, platformValue, sortValue, tags]);
+  }, [searchValue, versionsValue, platformValue, sortValue, tagsValue]);
+
+  const platforms = [
+    makeSection(
+      "platforms",
+      "multiple",
+      PLATFORMS.map((platform, index) => ({
+        id: index.toString(),
+        label: platform,
+      }))
+    ),
+  ];
+
+  const versions = [
+    makeSection(
+      "versions",
+      "multiple",
+      VERSIONS.map((version, index) => ({
+        id: index.toString(),
+        label: version,
+      }))
+    ),
+  ];
+
+  const sort = [
+    makeSection("players", "select", [
+      {
+        id: "most",
+        label: "Most Players",
+        selected: true,
+      },
+      {
+        id: "least",
+        label: "Least Players",
+      },
+    ]),
+    makeSection("ratings", "select", [
+      {
+        id: "most",
+        label: "Most Rating",
+        selected: true,
+      },
+      {
+        id: "least",
+        label: "Least Rating",
+      },
+    ]),
+  ];
+
+  const tags = [
+    makeSection(
+      "tags",
+      "multiple",
+      TAGS.map((tag, index) => ({
+        id: index.toString(),
+        label: tag,
+      }))
+    ),
+  ];
 
   return (
     <div className="flex flex-col gap-2">
@@ -104,16 +162,7 @@ const SearchSection = () => {
         <div className="flex gap-2 flex-wrap">
           <Dropdown
             name="Platforms"
-            sections={[
-              makeSection(
-                "platforms",
-                "multiple",
-                PLATFORMS.map((platform, index) => ({
-                  id: index.toString(),
-                  label: platform,
-                }))
-              ),
-            ]}
+            sections={platforms}
             onSelect={(selectedItems) => {
               const platformSection = selectedItems.find(
                 (sec) => sec.id === "platforms"
@@ -127,16 +176,7 @@ const SearchSection = () => {
 
           <Dropdown
             name="Versions"
-            sections={[
-              makeSection(
-                "versions",
-                "multiple",
-                VERSIONS.map((version, index) => ({
-                  id: index.toString(),
-                  label: version,
-                }))
-              ),
-            ]}
+            sections={versions}
             onSelect={(selectedItems) =>
               setVersionsValue(selectedItems[0].getSelectedLabels())
             }
@@ -146,18 +186,9 @@ const SearchSection = () => {
         <div className="flex gap-2 flex-wrap">
           <Dropdown
             name="Tags"
-            sections={[
-              makeSection(
-                "tags",
-                "multiple",
-                TAGS.map((tag, index) => ({
-                  id: index.toString(),
-                  label: tag,
-                }))
-              ),
-            ]}
+            sections={tags}
             onSelect={(selectedItems) => {
-              setTags(
+              setTagsValue(
                 selectedItems.flatMap((section) =>
                   section.items
                     .filter((item) => item.selected)
@@ -165,33 +196,11 @@ const SearchSection = () => {
                 )
               );
             }}
+            placement="bottom-end"
           />
           <Dropdown
             name="Sort by"
-            sections={[
-              makeSection("players", "select", [
-                {
-                  id: "most",
-                  label: "Most Players",
-                  selected: true,
-                },
-                {
-                  id: "least",
-                  label: "Least Players",
-                },
-              ]),
-              makeSection("ratings", "select", [
-                {
-                  id: "most",
-                  label: "Most Rating",
-                  selected: true,
-                },
-                {
-                  id: "least",
-                  label: "Least Rating",
-                },
-              ]),
-            ]}
+            sections={sort}
             onSelect={(selectedSections) => {
               const sort = Object.fromEntries(
                 selectedSections.map((section) => [
@@ -202,6 +211,7 @@ const SearchSection = () => {
 
               setSortValue(sort);
             }}
+            placement="bottom-end"
           />
         </div>
       </div>

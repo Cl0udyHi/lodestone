@@ -1,6 +1,6 @@
 import Link from "next/link";
 import React from "react";
-import { Button } from "./shadcn-ui/button";
+import { Button } from "./ui/shadcn-ui/button";
 
 export default function Navbar() {
   return (

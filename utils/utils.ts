@@ -1,13 +1,17 @@
-import { Servers, TAGS } from "./data";
+import { Servers, TAGS } from "./demo-data";
 import { ServerSearchQuery } from "./types";
 
 const filterServers = (query: ServerSearchQuery) => {
-  const { text, platforms, tags, versions, sort } = query;
+  const { text, platforms, tags, versions, sort, serverId } = query;
+
+  if (serverId) {
+    return Servers.filter((s) => s.id == serverId)[0];
+  }
 
   let list = Servers;
 
   // Filter with text
-  if (text.length >= 1) {
+  if (text && text.length >= 1) {
     const words: string[] = text.trim().toLowerCase().split(/\s+/);
     list = list.filter((server) => {
       return words.every(
