@@ -11,14 +11,53 @@ export type Server = {
   bannerUrl?: string;
   supportedVersions: string[];
   platforms: string[];
+  playerCount: number;
+  rating: number;
 };
 
 export type ServerSearchQuery = {
-  text: string;
-  platforms: string[];
-  versions: string[];
-  tags: string[];
+  serverId?: string;
+  text?: string;
+  platforms?: string[];
+  versions?: string[];
+  tags?: string[];
+  sort?: { [k: string]: SearchSort };
 };
 
-export type DDItemId = string | number;
-export type DDItem = { id: DDItemId; label: string };
+export type SearchSort = "most" | "least";
+
+export type DDItem = { id: string; label: string; selected?: boolean };
+
+export const makeSection = (
+  id: string,
+  type: "multiple" | "select",
+  items: DDItem[]
+): DDSection => new DDSection(id, type, items);
+
+export class DDSection {
+  id: string;
+  type: "multiple" | "select";
+  items: DDItem[];
+
+  constructor(id: string, type: "multiple" | "select", items: DDItem[]) {
+    this.id = id;
+    this.type = type;
+    this.items = items;
+  }
+
+  getSelectedLabels(): string[] {
+    return this.items.filter((i) => i.selected).map((i) => i.label);
+  }
+
+  getSelectedItems(): DDItem[] {
+    return this.items.filter((i) => i.selected);
+  }
+
+  getSelectedIds(): string[] {
+    return this.items.filter((i) => i.selected).map((i) => i.id);
+  }
+
+  getString(): string {
+    return this.getSelectedLabels().join(", ");
+  }
+}

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import React from "react";
-import { Button } from "./shadcn-ui/button";
+import { Button } from "./ui/shadcn-ui/button";
 
 export default function Navbar() {
   return (
@@ -8,7 +8,9 @@ export default function Navbar() {
       <Link href="/" className="text-2xl text-neutral-800 font-bold">
         Lodestone
       </Link>
-      <Button>Login</Button>
+      <Button className="bg-neutral-800 hover:bg-neutral-700 text-neutral-100 text-base rounded-full">
+        Login
+      </Button>
     </nav>
   );
 }
