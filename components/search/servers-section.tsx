@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import {
+  DDSection,
   makeSection,
   SearchSort,
   Server,
@@ -107,6 +108,14 @@ const SearchSection = () => {
     ),
   ];
 
+  function handlePlaformSelect(selectedItems: DDSection[]) {
+    const platformSection = selectedItems.find((sec) => sec.id === "platforms");
+
+    if (platformSection) {
+      setPlatformValue(platformSection.getSelectedLabels());
+    }
+  }
+
   const versions = [
     makeSection(
       "versions",
@@ -117,6 +126,10 @@ const SearchSection = () => {
       }))
     ),
   ];
+
+  function handleVersionSelect(selectedItems: DDSection[]) {
+    setVersionsValue(selectedItems[0].getSelectedLabels());
+  }
 
   const sort = [
     makeSection("players", "select", [
@@ -143,6 +156,17 @@ const SearchSection = () => {
     ]),
   ];
 
+  function handleSortSelect(selectedItems: DDSection[]) {
+    const sort = Object.fromEntries(
+      selectedItems.map((section) => [
+        section.id,
+        section.getSelectedItems()[0]?.id as SearchSort,
+      ])
+    );
+
+    setSortValue(sort);
+  }
+
   const tags = [
     makeSection(
       "tags",
@@ -153,6 +177,14 @@ const SearchSection = () => {
       }))
     ),
   ];
+
+  function handleTagSelect(selectedItems: DDSection[]) {
+    setTagsValue(
+      selectedItems.flatMap((section) =>
+        section.items.filter((item) => item.selected).map((item) => item.label)
+      )
+    );
+  }
 
   return (
     <div className="flex flex-col gap-2">
@@ -167,23 +199,13 @@ const SearchSection = () => {
           <Dropdown
             name="Platforms"
             sections={platforms}
-            onSelect={(selectedItems) => {
-              const platformSection = selectedItems.find(
-                (sec) => sec.id === "platforms"
-              );
-
-              if (platformSection) {
-                setPlatformValue(platformSection.getSelectedLabels());
-              }
-            }}
+            onSelect={handlePlaformSelect}
           />
 
           <Dropdown
             name="Versions"
             sections={versions}
-            onSelect={(selectedItems) =>
-              setVersionsValue(selectedItems[0].getSelectedLabels())
-            }
+            onSelect={handleVersionSelect}
           />
         </div>
 
@@ -191,30 +213,13 @@ const SearchSection = () => {
           <Dropdown
             name="Tags"
             sections={tags}
-            onSelect={(selectedItems) => {
-              setTagsValue(
-                selectedItems.flatMap((section) =>
-                  section.items
-                    .filter((item) => item.selected)
-                    .map((item) => item.label)
-                )
-              );
-            }}
+            onSelect={handleTagSelect}
             placement="bottom-end"
           />
           <Dropdown
             name="Sort by"
             sections={sort}
-            onSelect={(selectedSections) => {
-              const sort = Object.fromEntries(
-                selectedSections.map((section) => [
-                  section.id,
-                  section.getSelectedItems()[0]?.id as SearchSort,
-                ])
-              );
-
-              setSortValue(sort);
-            }}
+            onSelect={handleSortSelect}
             placement="bottom-end"
           />
         </div>
