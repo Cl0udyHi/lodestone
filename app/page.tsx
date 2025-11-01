@@ -10,7 +10,7 @@ export default function Home() {
       <div className="w-full min-h-screen">
         <section
           className={classNames(
-            "relative w-full min-h-[400px] flex flex-col px-16 pt-16 justify-end items-center bg-neutral-700",
+            "relative w-full min-h-[400px] flex flex-col px-8 md:px-16 pt-16 justify-end items-center bg-neutral-700",
             "md:flex-row md:justify-center md:items-end md:h-[400px] md:gap-16 md:pt-0"
           )}
         >

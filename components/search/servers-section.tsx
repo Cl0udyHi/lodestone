@@ -38,7 +38,7 @@ function Content() {
   const servers: Server[] = Array.isArray(data) ? data : data ? [data] : [];
 
   return (
-    <section className="w-full min-h-screen bg-neutral-100 px-16 py-8 flex flex-col gap-5">
+    <section className="w-full min-h-screen bg-neutral-100 px-8 md:px-16 py-8 flex flex-col gap-5">
       <h1 className="font-medium text-2xl text-neutral-800">Server List</h1>
       <SearchQueryContext.Provider value={[searchQuery, setSearchQuery]}>
         <SearchSection />
