@@ -103,4 +103,6 @@ const Searchbar = forwardRef<SearchbarRef, SearchbarProps>(
   }
 );
 
+Searchbar.displayName = "Searchbar";
+
 export default Searchbar;

@@ -21,6 +21,7 @@ import Searchbar from "../ui/searchbar";
 import Dropdown from "../ui/dropdown";
 import { PLATFORMS, VERSIONS } from "@/utils/constants";
 import { TAGS } from "@/utils/demo-data";
+import classNames from "classnames";
 
 export const SearchQueryContext = createContext<
   [ServerSearchQuery, Dispatch<SetStateAction<ServerSearchQuery>>] | null
@@ -45,7 +46,14 @@ function Content() {
         {error ? (
           <h1>An error has occurred: {error.message}</h1>
         ) : (
-          <div className="grid grid-cols-2 grid-rows-10 gap-4">
+          <div
+            className={classNames(
+              "grid gap-4",
+              "grid-cols-1 grid-rows-20",
+              "lg:grid-cols-2 lg:grid-rows-10",
+              "2xl:grid-cols-3 2xl:grid-rows-7"
+            )}
+          >
             {isPending ? (
               <ServersSkeleton />
             ) : (
